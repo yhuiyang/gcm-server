@@ -35,8 +35,8 @@ handlers:
   static_dir: static/js
 
 - url: /fonts/(.*\.(eot|svg|ttf|woff))
-  static_files: static/img/\1
-  upload: static/img/(.*\.(eot|svg|ttf|woff))
+  static_files: static/fonts/\1
+  upload: static/fonts/(.*\.(eot|svg|ttf|woff))
 
 - url: /robots\.txt
   static_files: static/robots.txt

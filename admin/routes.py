@@ -11,9 +11,9 @@ from webapp2_extras.routes import RedirectRoute
 import handlers
 
 _routes = [
-    RedirectRoute(r'/admin/', redirect_to_name='admin-apps-crud', name='admin-dashboard', strict_slash=True),
-    RedirectRoute(r'/admin/apps', handler=handlers.GcmAppsCRUDHandler, name='admin-apps-crud', strict_slash=True),
-    RedirectRoute(r'/admin/app/<pkg_name:[a-zA-Z.]*>', handler=handlers.GcmDevicesCRUDHandler, name='admin-devices-crud', strict_slash=True),
+    RedirectRoute(r'/admin/', redirect_to_name='admin-dashboard', name='admin-base', strict_slash=True),
+    RedirectRoute(r'/admin/dashboard', handler=handlers.GcmDashboardHandler, name='admin-dashboard', strict_slash=True),
+    RedirectRoute(r'/admin/app/<urlsafe_key>', handler=handlers.GcmAppsCRUDHandler, name='admin-apps-crud', strict_slash=True),
 ]
 
 

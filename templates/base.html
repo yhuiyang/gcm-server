@@ -18,6 +18,7 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     {% endif %}
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/simple-sidebar.css">
     {% block mediaCSS %}{% endblock %}
 </head>
 <body>
@@ -27,60 +28,68 @@
     <p class=chromeframe>Your browser is <em>ancient!</em><a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true"> install Google Chrome Frame</a> to experience this site.</p>
     <![endif]-->
 
-    <div id="page">
-        {% block navbar %}
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="glyphicon glyphicon-chevron-down icon-white"></span>
-                    </button>
-                     <!-- Be sure to leave the brand out there if you want it shown -->
-                    <a class="brand" href="#">{{ app_name }}</a>
-                    <!-- Everything you want hidden at 940px or less, place within here -->
-                    <div class="nav-collapse collapse">
-                        <ul class="nav pull-right">
-                            {% block navbar_list_items %}
-                            <li><a href="#" target="_blank">About</a></li>
-                            {% endblock %}
-                        </ul>
-                    </div><!-- /.nav-collapse -->
-                </div><!-- /container -->
-            </div><!-- /navbar-inner -->
-        </div><!-- /navbar -->
-        {% endblock %}
+    <div id="wrapper">
 
-        <div id="content" class="container container-fluid">
-            {% block header %}{% endblock %}
-
-            {% if messages|safe %}
-                {% for message in messages %}
-                <p class="alert alert-{{ message[1]|safe }}">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {{ message[0]|safe }}
-                </p>
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">Android GCM Server</li>
+                {% if is_dashboard %}<li class="active">Dashboard</li>{% else %}<li><a href="/admin/dashboard">Dashboard</a></li>{% endif %}
+                {% for gcm_app in gcm_app_list %}
+                    {% if gcm_app.active and not is_dashboard %}
+                    <li class="active">{{ gcm_app.name }}</li>
+                    {% else %}
+                    <li><a href="/admin/app/{{ gcm_app.url }}">{{ gcm_app.name }}</a></li>
+                    {% endif %}
                 {% endfor %}
-            {% endif %}
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
 
-            {% block content %}{% endblock %}
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                {% if messages | safe %}
+                    {% for message in messages %}
+                    <div class="row">
+                        <div class="col-lg-12 alert alert-{{ message[1] | safe }} alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            {{ message[0] | safe }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                <div class="row">
+                    <div class="col-lg-12">{% block content %}{% endblock %}</div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
 
-        </div><!-- /content -->
-    </div><!-- /page -->
+    </div>
 
     <hr>
-    {% block footer %}
-    <footer style="text-align: center;">
+    <footer style="text-align: right;padding-right: 20px;">
         <p>Copyright &copy; 2014 <a href="//yhsoftlab.appspot.com" target="_blank">YHSoftLab</a>, All Rights Reserved.</p>
     </footer>
-    {% endblock %}
-
 
     <!-- JavaScript at the bottom for fast page loading -->
     <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/js/jquery-2.0.2.min.js"><\/script>')</script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/jquery-2.1.1.min.js"><\/script>')</script>
     <script src="/js/bootstrap.min.js"></script>
+
+    <script src="/js/jquery.cookie-1.4.1.min.js"></script>
+    <script type="application/javascript">
+        $(".alert").on("close.bs.alert", function() {
+            var alert = $(this);
+            $.each(["danger", "warning", "info", "success"], function(index, type) {
+                if (alert.hasClass("alert-" + type)) {
+                    $.removeCookie("alert-" + type, { path: "/" });
+                }
+            });
+        });
+    </script>
     {% block mediaJS %}{% endblock %}
     <!-- end scripts -->
 </body>

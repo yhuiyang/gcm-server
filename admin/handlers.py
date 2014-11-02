@@ -6,6 +6,7 @@ import logging
 
 # GAE import
 from google.appengine.ext import ndb
+from google.net.proto.ProtocolBuffer import ProtocolBufferDecodeError
 
 # local import
 from common.base_handler import BaseHandler
@@ -64,6 +65,16 @@ class GcmDashboardHandler(BaseHandler):
 
 class GcmAppsCRUDHandler(BaseHandler):
     def get(self, urlsafe_key):
+
+        # check if key built from urlsafe_key exists or not?
+        # try:
+        #     test_key = ndb.Key(urlsafe=urlsafe_key)
+        #     test_entity = test_key.get()
+        # except ProtocolBufferDecodeError:
+        #     test_entity = None
+        # if test_entity is None:
+        #     self.response.status = '404 Not Found'
+        #     return
 
         params = {
             'is_dashboard': False,

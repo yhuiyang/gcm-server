@@ -82,6 +82,17 @@ class GcmAppsCRUDHandler(BaseHandler):
             'gcm_app_list': [],
         }
 
+        # retrieve app configuration from given key
+        try:
+            given_key = ndb.Key(urlsafe=urlsafe_key)
+            given_entity = given_key.get()
+        except ProtocolBufferDecodeError:
+            given_entity = None
+        if given_entity is not None:
+            params['package_name'] = given_key.id()
+            params['sender_id'] = given_entity.sender_id
+            params['api_key'] = given_entity.google_api_key
+
         # check if alert messages exist (only one most recently for each alert type)
         for alert in ('danger', 'warning', 'info', 'success'):
             message = self.request.cookies.get('alert-' + alert)

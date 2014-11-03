@@ -80,6 +80,7 @@ class GcmAppsCRUDHandler(BaseHandler):
             'is_dashboard': False,
             'messages': [],
             'gcm_app_list': [],
+            'devices': [],
         }
 
         # retrieve app configuration from given key
@@ -109,5 +110,20 @@ class GcmAppsCRUDHandler(BaseHandler):
             d['active'] = True if d['url'] == urlsafe_key else False
 
             params['gcm_app_list'].append(d)
+
+        # query gcm device list for this app
+        devices = gcm_app.GcmDeviceModel.query(gcm_app.GcmDeviceModel.package == params['package_name'])
+        devices = devices.order(-gcm_app.GcmDeviceModel.timestamp)
+        devices = devices.fetch(100)
+        l = list()
+        for device in devices:
+            d = dict()
+            d['uuid'] = device.uuid
+            d['package'] = device.package
+            d['version'] = device.version
+            d['timestamp'] = device.timestamp
+            d['registration_id'] = device.key.id()
+            l.append(d)
+        params['devices'] = l
 
         self.render_template('gcm_devices.html', **params)

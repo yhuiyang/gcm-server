@@ -15,7 +15,13 @@ class GcmAppModel(ndb.Model):
     Entity's key = ndb.Key(GcmAppModel, apk_package_name)
     '''
     display_name = ndb.StringProperty()
-    #package_name = ndb.StringProperty()
     sender_id = ndb.StringProperty(indexed=False)
     google_api_key = ndb.StringProperty(indexed=False)
+    timestamp = ndb.DateTimeProperty(auto_now=True)
+
+
+class GcmDeviceModel(ndb.Model):
+    uuid = ndb.StringProperty(indexed=False)
+    package = ndb.StringProperty()
+    version = ndb.IntegerProperty()
     timestamp = ndb.DateTimeProperty(auto_now=True)

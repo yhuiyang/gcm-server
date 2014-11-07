@@ -62,7 +62,7 @@ class RegisterHandlerV1(webapp2.RequestHandler):
         h2.update(self.request.body)
         calculated_hash = h2.hexdigest()  # represented in hex-decimal format
 
-        if client_hash != calculated_hash:
+        if client_hash.lower() != calculated_hash.lower():
             reasons = ('HashInvalid',) * 30
             reasons += ('DataCorrupted',) * 17
             reasons += ('AskAuthor',) * 2

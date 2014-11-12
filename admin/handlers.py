@@ -3,6 +3,7 @@
 
 # python import
 import logging
+from datetime import date, timedelta
 
 # GAE import
 from google.appengine.ext import ndb
@@ -11,6 +12,7 @@ from google.net.proto.ProtocolBuffer import ProtocolBufferDecodeError
 # local import
 from common.base_handler import BaseHandler
 from models import gcm_app
+from utils import gviz_api
 
 
 class GcmDashboardHandler(BaseHandler):
@@ -37,6 +39,69 @@ class GcmDashboardHandler(BaseHandler):
             d['name'] = app.display_name
             d['url'] = app.key.urlsafe()
             params['gcm_app_list'].append(d)
+
+        #
+        # TEST PURPOSE ONLY
+        #
+        chart_column = {
+            'date': ('date', 'Register Date'),
+            'app1': ('number', 'Name of app1'),
+            'app2': ('number', 'Name of app2'),
+            'app3': ('number', 'Name of app3'),
+        }
+        chart_data = [
+            {
+                'date': date.today() + timedelta(-7),
+                'app1': 13,
+                'app2': 4,
+                'app3': 6,
+            },
+            {
+                'date': date.today() + timedelta(-6),
+                'app1': 7,
+                'app2': 9,
+                'app3': 12,
+            },
+            {
+                'date': date.today() + timedelta(-5),
+                'app1': 29,
+                'app2': 11,
+                'app3': 35,
+            },
+            {
+                'date': date.today() + timedelta(-4),
+                'app1': 34,
+                'app2': 16,
+                'app3': 7,
+            },
+            {
+                'date': date.today() + timedelta(-3),
+                'app1': 77,
+                'app2': 6,
+                'app3': 18,
+            },
+            {
+                'date': date.today() + timedelta(-2),
+                'app1': 56,
+                'app2': 45,
+                'app3': 29,
+            },
+            {
+                'date': date.today() + timedelta(-1),
+                'app1': 50,
+                'app2': 80,
+                'app3': 96,
+            },
+            {
+                'date': date.today(),
+                'app1': 36,
+                'app2': 46,
+                'app3': 61,
+            },
+        ]
+        schema = gviz_api.DataTable(chart_column)
+        schema.LoadData(chart_data)
+        params['chart_json'] = schema.ToJSon(columns_order=('date', 'app1', 'app2', 'app3'))
 
         self.render_template('gcm_dashboard.html', **params)
 

@@ -46,9 +46,26 @@
         </div>
     </div>
 </div>
+
+<div id="chart1" style="width: 100%; height: 400px;"></div>
 {% endblock %}
 
 {% block mediaJS %}
-<script type="application/javascript">
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var chart_json = '{{ chart_json | safe }}';
+        var data = new google.visualization.DataTable(chart_json, 0.6);
+
+        var options = {
+            title: '最近30日各GCM APP註冊裝置數量'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart1'));
+
+        chart.draw(data, options);
+      }
 </script>
 {% endblock %}

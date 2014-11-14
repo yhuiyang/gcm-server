@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Under Construction</title>
+
+    <style type="text/css">
+    div.full-size {
+        position: absolute;
+        top:0;
+        bottom:0;
+        right:0;
+        left:0;
+        background-color: orange;
+    }
+    pre#ascii-art {
+        color: black;
+        position: absolute;
+    }
+    </style>
+</head>
+<body>
+<div class="full-size">
+<pre id="ascii-art">
+                        ██╗    ██╗███████╗██████╗ ███████╗██╗████████╗███████╗
+                        ██║    ██║██╔════╝██╔══██╗██╔════╝██║╚══██╔══╝██╔════╝
+                        ██║ █╗ ██║█████╗  ██████╔╝███████╗██║   ██║   █████╗
+                        ██║███╗██║██╔══╝  ██╔══██╗╚════██║██║   ██║   ██╔══╝
+                        ╚███╔███╔╝███████╗██████╔╝███████║██║   ██║   ███████╗
+                         ╚══╝╚══╝ ╚══════╝╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚══════╝
+
+                             ██╗   ██╗███╗   ██╗██████╗ ███████╗██████╗
+                             ██║   ██║████╗  ██║██╔══██╗██╔════╝██╔══██╗
+                             ██║   ██║██╔██╗ ██║██║  ██║█████╗  ██████╔╝
+                             ██║   ██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗
+                             ╚██████╔╝██║ ╚████║██████╔╝███████╗██║  ██║
+                              ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
+
+ ██████╗ ██████╗ ███╗   ██╗███████╗████████╗██████╗ ██╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
+██╔════╝██╔═══██╗████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║
+██║     ██║   ██║██╔██╗ ██║███████╗   ██║   ██████╔╝██║   ██║██║        ██║   ██║██║   ██║██╔██╗ ██║
+██║     ██║   ██║██║╚██╗██║╚════██║   ██║   ██╔══██╗██║   ██║██║        ██║   ██║██║   ██║██║╚██╗██║
+╚██████╗╚██████╔╝██║ ╚████║███████║   ██║   ██║  ██║╚██████╔╝╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+</pre>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/jquery-2.1.1.min.js"><\/script>')</script>
+<script type="application/javascript">
+    $('document').ready(function() {
+        center_ascii_art();
+    });
+
+    $(window).resize(function() {
+        center_ascii_art()
+    });
+
+    function center_ascii_art() {
+        var ascii = $('pre#ascii-art');
+        var ascii_height = ascii.height();
+        var ascii_width = ascii.width();
+
+        var win = $(window);
+        var win_height = win.height();
+        var win_width = win.width();
+
+        var top = (win_height - ascii_height) / 2;
+        var left = (win_width - ascii_width) / 2;
+        ascii.css({top: top, left: left});
+    }
+</script>
+</body>
+</html>

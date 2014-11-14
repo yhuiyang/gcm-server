@@ -10,9 +10,10 @@ from google.appengine.ext import ndb
 from google.net.proto.ProtocolBuffer import ProtocolBufferDecodeError
 
 # local import
-from common.base_handler import BaseHandler
+#from ..lib import base_handler
+from lib.base_handler import BaseHandler
 from models import gcm_app
-from utils import gviz_api
+from lib import gviz_api
 
 
 class GcmDashboardHandler(BaseHandler):

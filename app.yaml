@@ -7,11 +7,8 @@ threadsafe: yes
 
 instance_class: F1
 automatic_scaling:
-  max_idle_instances: 2
+  max_idle_instances: 1
   min_pending_latency: 15.0s
-
-builtins:
-- appstats: on
 
 handlers:
 - url: /favicon\.ico
@@ -26,6 +23,14 @@ handlers:
   static_files: static/apple-touch-icon-precomposed.png
   upload: static/apple-touch-icon-precomposed.png
 
+- url: /robots\.txt
+  static_files: static/robots.txt
+  upload: static/robots\.txt
+
+- url: /fonts/(.*\.(eot|svg|ttf|woff))
+  static_files: static/fonts/\1
+  upload: static/fonts/(.*\.(eot|svg|ttf|woff))
+
 - url: /css
   mime_type: text/css
   static_dir: static/css
@@ -34,20 +39,8 @@ handlers:
   mime_type: text/javascript
   static_dir: static/js
 
-- url: /fonts/(.*\.(eot|svg|ttf|woff))
-  static_files: static/fonts/\1
-  upload: static/fonts/(.*\.(eot|svg|ttf|woff))
-
-- url: /robots\.txt
-  static_files: static/robots.txt
-  upload: static/robots\.txt
-
-- url: /admin/.*
-  script: frontend.APP
-  login: admin
-
 - url: /.*
-  script: frontend.APP
+  script: main.APP
 
 libraries:
 - name: webapp2

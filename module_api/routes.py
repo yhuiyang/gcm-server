@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # python import
-import logging
 
 # GAE import
 from webapp2_extras.routes import RedirectRoute

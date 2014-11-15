@@ -1,0 +1,23 @@
+application: your-application-id
+module: cron
+version: master
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+instance_class: B1
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 5m
+
+builtins:
+- appstats: on
+
+handlers:
+- url: /.*
+  script: module_cron.cron.APP
+  login: admin
+
+libraries:
+- name: webapp2
+  version: "2.5.2"

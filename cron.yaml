@@ -1,0 +1,6 @@
+# Free app can have up to 20 cron jobs. Paid app can have up to 100 cron jobs.
+cron:
+- description: Daily cron jobs run at midnight 00:01 (UTC)
+  url: /cron/daily_0001
+  schedule: every day 00:01
+  target: cron

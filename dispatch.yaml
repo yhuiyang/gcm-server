@@ -4,3 +4,6 @@ dispatch:
 
   - url: "*/admin/*"
     module: admin
+
+  - url: "*/cron/*"
+    module: cron

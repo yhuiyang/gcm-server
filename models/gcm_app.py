@@ -25,3 +25,8 @@ class GcmDeviceModel(ndb.Model):
     package = ndb.StringProperty()
     version = ndb.IntegerProperty()
     timestamp = ndb.DateTimeProperty(auto_now=True)
+
+
+class GcmDeviceDailyCountModel(ndb.Model):
+    # Entity key = ndb.Key(GcmDeviceDailyCountModel, 'app.package.name_{register,unregister}_yyyy-mm-dd')
+    count = ndb.IntegerProperty()

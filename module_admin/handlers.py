@@ -31,78 +31,38 @@ class GcmDashboardHandler(BaseHandler):
             if message is not None:
                 params['messages'].append((message, alert))
 
+        # init chart data
+        chart_column = {'date': ('date', 'Register date')}
+        chart_column_order = ('date',)  # final is ('date', 'app1', 'app2', ... 'appN')
+        chart_data = list()  # final is [{'date': date1, 'app1': x, 'app2': y, ..., 'appN': K}{'date': date2, ...}]
+        recently_day_list = range(-6, 1)
+        for day in recently_day_list:
+            d = dict()
+            d['date'] = date.today() + timedelta(day)
+            chart_data.append(d)
+
         # query gcm app list
         parent_key = ndb.Key(gcm_app.GcmAppModel, 'GcmApp')
         apps = gcm_app.GcmAppModel.query(ancestor=parent_key)
-        for app in apps:
+        for idx, app in enumerate(apps, start=1):
+            # prepare data used by sidebar in template file
             d = dict()
             d['active'] = False
             d['name'] = app.display_name
             d['url'] = app.key.urlsafe()
             params['gcm_app_list'].append(d)
 
-        #
-        # TEST PURPOSE ONLY
-        #
-        chart_column = {
-            'date': ('date', 'Register Date'),
-            'app1': ('number', 'Name of app1'),
-            'app2': ('number', 'Name of app2'),
-            'app3': ('number', 'Name of app3'),
-        }
-        chart_data = [
-            {
-                'date': date.today() + timedelta(-7),
-                'app1': 13,
-                'app2': 4,
-                'app3': 6,
-            },
-            {
-                'date': date.today() + timedelta(-6),
-                'app1': 7,
-                'app2': 9,
-                'app3': 12,
-            },
-            {
-                'date': date.today() + timedelta(-5),
-                'app1': 29,
-                'app2': 11,
-                'app3': 35,
-            },
-            {
-                'date': date.today() + timedelta(-4),
-                'app1': 34,
-                'app2': 16,
-                'app3': 7,
-            },
-            {
-                'date': date.today() + timedelta(-3),
-                'app1': 77,
-                'app2': 6,
-                'app3': 18,
-            },
-            {
-                'date': date.today() + timedelta(-2),
-                'app1': 56,
-                'app2': 45,
-                'app3': 29,
-            },
-            {
-                'date': date.today() + timedelta(-1),
-                'app1': 50,
-                'app2': 80,
-                'app3': 96,
-            },
-            {
-                'date': date.today(),
-                'app1': 36,
-                'app2': 46,
-                'app3': 61,
-            },
-        ]
+            # prepare data used by dashboard chart
+            chart_column['app' + str(idx)] = ('number', app.display_name)
+            chart_column_order += ('app' + str(idx),)
+            for day_idx in range(len(recently_day_list)):
+                this_day = chart_data[day_idx]['date']
+                cnt_ent = gcm_app.GcmDeviceDailyCountModel.get_by_id(app.key.string_id() + '_register_' + str(this_day))
+                chart_data[day_idx]['app' + str(idx)] = cnt_ent.count if cnt_ent is not None else 0
+
         schema = gviz_api.DataTable(chart_column)
         schema.LoadData(chart_data)
-        params['chart_json'] = schema.ToJSon(columns_order=('date', 'app1', 'app2', 'app3'))
+        params['chart_json'] = schema.ToJSon(columns_order=chart_column_order)
 
         self.render_template('gcm_dashboard.html', **params)
 

@@ -13,6 +13,7 @@ from google.appengine.ext import ndb
 
 # local import
 from models import gcm_app
+from lib import shard
 
 
 class RegisterHandlerV1(webapp2.RequestHandler):
@@ -87,11 +88,19 @@ class RegisterHandlerV1(webapp2.RequestHandler):
             return
 
         # save into data store
-        entity = gcm_app.GcmDeviceModel(id=registration_id)
-        entity.populate(uuid=uuid, package=package, version=int(version))
-        entity.put()
+        self.register_device(registration_id, package, int(version), uuid)
 
         self.set_result('OK')
+
+    @ndb.transactional(xg=True)
+    def register_device(self, registration_id, package, version, uuid):
+        # create a registered device entity
+        entity = gcm_app.GcmDeviceModel(id=registration_id)
+        entity.populate(package=package, version=version, uuid=uuid)
+        entity.put()
+        # increase registered device count for this app package
+        shard.increment(package + '_register')
+        pass
 
     def set_result(self, result, reason=None, log_message=None):
         response = dict()

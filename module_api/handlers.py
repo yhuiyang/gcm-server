@@ -10,6 +10,7 @@ import random
 # GAE import
 import webapp2
 from google.appengine.ext import ndb
+from google.appengine.ext import db
 
 # local import
 from models import gcm_app
@@ -88,11 +89,15 @@ class RegisterHandlerV1(webapp2.RequestHandler):
             return
 
         # save into data store
-        self.register_device(registration_id, package, int(version), uuid)
+        try:
+            self.register_device(registration_id, package, int(version), uuid)
+        except db.TransactionFailedError:
+            self.set_result('Fail', 'RetryLater', 'Cross group transaction db write failed.')
+            return
 
         self.set_result('OK')
 
-    @ndb.transactional(xg=True)
+    @ndb.transactional(xg=True, retries=0)
     def register_device(self, registration_id, package, version, uuid):
         # create a registered device entity
         entity = gcm_app.GcmDeviceModel(id=registration_id)

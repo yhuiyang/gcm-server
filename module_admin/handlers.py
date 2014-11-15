@@ -62,7 +62,12 @@ class GcmDashboardHandler(BaseHandler):
 
         schema = gviz_api.DataTable(chart_column)
         schema.LoadData(chart_data)
-        params['chart_json'] = schema.ToJSon(columns_order=chart_column_order)
+        #
+        # Need to convert the json string to unicode.
+        # If we don't do this and there is Chinese character within the json string, there will be exception raised
+        # when Jinja rendering its value...
+        #
+        params['chart_json'] = schema.ToJSon(columns_order=chart_column_order).decode('utf-8')
 
         self.render_template('gcm_dashboard.html', **params)
 

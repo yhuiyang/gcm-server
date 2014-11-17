@@ -62,13 +62,23 @@
         var data = new google.visualization.DataTable(chart_json, 0.6);
 
         var options = {
+            hAxis: {
+                title: '日期',
+                format: 'MMM d'
+            },
+            vAxis: {
+                //format: '#',
+                title: '裝置數',
+                viewWindow: { min: 0 }
+            },
+            legend: { position: 'bottom' },
             focusTarget: 'category',
-            title: '最近七日各GCM APP註冊裝置數量'
+            title: 'GCM APP每日註冊裝置數量',
+            titlePosition: 'in'
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart1'));
-
         chart.draw(data, options);
-      }
+    }
 </script>
 {% endblock %}

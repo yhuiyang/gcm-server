@@ -29,4 +29,5 @@ class GcmDeviceModel(ndb.Model):
 
 class GcmDeviceDailyCountModel(ndb.Model):
     # Entity key = ndb.Key(GcmDeviceDailyCountModel, 'app.package.name_{register,unregister}_yyyy-mm-dd')
-    count = ndb.IntegerProperty()
+    count = ndb.IntegerProperty(default=0)  # count for this one day
+    countTillYesterday = ndb.IntegerProperty(default=0)  # count from long time ago to yesterday

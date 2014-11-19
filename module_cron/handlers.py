@@ -24,15 +24,16 @@ class CronDaily0001Handler(webapp2.RequestHandler):
         apps = gcm_app.GcmAppModel.query(ancestor=ndb.Key(gcm_app.GcmAppModel, 'GcmApp'))
         for app in apps:
             app_package = app.key.string_id()
-            # today count = total count - yesterday count
+            # today count = total count - count till yesterday
             yesterday_entity = gcm_app.GcmDeviceDailyCountModel.get_by_id(app_package + '_register_' + str(yesterday))
-            yesterday_count = 0 if yesterday_entity is None else yesterday_entity.count
+            count_till_yesterday = 0 if yesterday_entity is None else yesterday_entity.countTillYesterday
             total_count = shard.get_count(app_package + '_register')
-            today_count = total_count - yesterday_count
+            today_count = total_count - count_till_yesterday
 
-            logging.info('package: %s, total: %d, yesterday: %d, today: %d' %
-                         (app_package, total_count, yesterday_count, today_count))
+            logging.info('package: %s, total: %d, till yesterday: %d, today: %d' %
+                         (app_package, total_count, count_till_yesterday, today_count))
 
             today_entity = gcm_app.GcmDeviceDailyCountModel(id=app_package + '_register_' + str(today))
             today_entity.count = today_count
+            today_entity.countTillYesterday = total_count
             today_entity.put()

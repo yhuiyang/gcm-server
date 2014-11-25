@@ -1,0 +1,7 @@
+total_storage_limit: 50M
+queue:
+- name: gcm-sender
+  rate: 5/m
+  bucket_size: 3
+  max_concurrent_requests: 2
+

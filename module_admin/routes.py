@@ -8,12 +8,15 @@ from webapp2_extras.routes import RedirectRoute
 
 # local import
 from handlers import GcmDashboardHandler
-from handlers import GcmAppsCRUDHandler
+from handlers import GcmDevicesCRUDHandler
+from handlers import GcmSenderHandler
 
 _routes = [
     RedirectRoute(r'/admin/', redirect_to_name='admin-dashboard', name='admin-base', strict_slash=True),
     RedirectRoute(r'/admin/dashboard', handler=GcmDashboardHandler, name='admin-dashboard', strict_slash=True),
-    RedirectRoute(r'/admin/app/<urlsafe_key>', handler=GcmAppsCRUDHandler, name='admin-apps-crud', strict_slash=True),
+    RedirectRoute(r'/admin/app/<urlsafe_key>', handler=GcmDevicesCRUDHandler, name='admin-devices-crud',
+                  strict_slash=True),
+    RedirectRoute(r'/taskqueue/gcm_sender', handler=GcmSenderHandler, name='gcm-sender', strict_slash=True),
 ]
 
 

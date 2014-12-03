@@ -6,7 +6,7 @@ dispatch:
     module: admin
 
   - url: "*/taskqueue/*"
-    module: admin
+    module: taskqueue
 
   - url: "*/cron/*"
     module: cron

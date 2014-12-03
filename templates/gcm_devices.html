@@ -1,18 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="modal fade" id="modal-form-send-message-to-all" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modal-form-send-message-to-all" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form class="form" role="form" method="post">
+            <form class="form-horizontal" role="form" method="post">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h4 class="modal-title">GCM message</h4>
+                    <h4 class="modal-title" id="form-send-all-title">GCM message</h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="input-message" class="control-label">Message</label>
-                        <textarea class="form-control" rows="10" name="message" id="input-message" placeholder='Message should be in json object format. ex:
+                        <label for="input-collapse-key" class="col-sm-3 control-label">Collapse Key</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="collapse_key" id="input-collapse-key" placeholder="Any string. ex: Update available"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Delay while idle</label>
+                        <div class="col-sm-9">
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-default active">
+                                    <input type="radio" name="delay_while_idle" value="none" autocomplete="off" checked />Unspecified
+                                </label>
+                                <label class="btn btn-default">
+                                    <input type="radio" name="delay_while_idle" value="true" autocomplete="off" />True
+                                </label>
+                                <label class="btn btn-default">
+                                    <input type="radio" name="delay_while_idle" value="false" autocomplete="off" />False
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-time-to-live" class="col-sm-3 control-label">Time to live</label>
+                        <div class="col-sm-9">
+                            <input type="number" max="2419200" min="0" class="form-control" name="time_to_live" id="input-time-to-live" placeholder="range: [0, 2419200]"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-data" class="col-sm-3 control-label">Data</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" rows="10" name="data" id="input-data" placeholder='Data should be in json object format. ex:
 {
   "key1": "string_value",
   "key2": numeric_value,
@@ -22,9 +51,22 @@
     "list3"
   ]
 }'></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <div class="pull-left">
+                        <label class="control-label">Dry run</label>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-default">
+                                <input type="radio" name="dry_run" value="true" autocomplete="off" />True
+                            </label>
+                            <label class="btn btn-default active">
+                                <input type="radio" name="dry_run" value="false" autocomplete="off" checked/>False
+                            </label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Send</button>
                 </div>
             </form>

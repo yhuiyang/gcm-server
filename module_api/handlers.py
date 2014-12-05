@@ -74,23 +74,28 @@ class RegisterHandlerV1(webapp2.RequestHandler):
             return
 
         # check gcm app exist
-        app_entity = gcm_app.GcmAppModel.get_by_id(package, parent=ndb.Key(gcm_app.GcmAppModel, 'GcmApp'))
-        if app_entity is None:
+        if not gcm_app.GcmAppModel.check_exist(package):
             self.set_result('Fail', 'UnknownApp', 'Client register for unknown app.')
             return
 
         # check not register before
-        test_entity = gcm_app.GcmDeviceModel.get_by_id(registration_id)
+        test_entity = gcm_app.GcmDeviceModel.get_instance(registration_id)
         if test_entity is not None:
-            self.set_result('Fail', 'AlreadyRegistered', 'Client had registered before, ignore current request.')
-            logging.debug('Entity: uuid[%s], package[%s], version[%d]' %
-                          (test_entity.uuid, test_entity.package, test_entity.version))
-            logging.debug('Request: uuid[%s], package[%s], version[%d]' % (uuid, package, int(version)))
-            return
+            if not test_entity.enabled:
+                enable_only = True
+                logging.debug('Device registered and unregistered before, re-enable it again.')
+            else:
+                self.set_result('Fail', 'AlreadyRegistered', 'Client had registered before, ignore current request.')
+                logging.debug('Entity: uuid[%s], package[%s], version[%d]' %
+                              (test_entity.uuid, test_entity.package, test_entity.version))
+                logging.debug('Request: uuid[%s], package[%s], version[%d]' % (uuid, package, int(version)))
+                return
+        else:
+            enable_only = False
 
         # save into data store
         try:
-            self.register_device(registration_id, package, int(version), uuid)
+            self.register_device(registration_id, package, int(version), uuid, enable_only=enable_only)
         except db.TransactionFailedError:
             self.set_result('Fail', 'RetryLater', 'Cross group transaction db write failed.')
             return
@@ -98,14 +103,19 @@ class RegisterHandlerV1(webapp2.RequestHandler):
         self.set_result('OK')
 
     @ndb.transactional(xg=True, retries=0)
-    def register_device(self, registration_id, package, version, uuid):
+    def register_device(self, registration_id, package, version, uuid, enable_only=False):
         # create a registered device entity
         entity = gcm_app.GcmDeviceModel(id=registration_id)
-        entity.populate(package=package, version=version, uuid=uuid)
+        if enable_only:
+            entity.enabled = True
+        else:
+            entity.package = package
+            entity.version = version
+            entity.uuid = uuid
         entity.put()
+
         # increase registered device count for this app package
         shard.increment(package + '_register')
-        pass
 
     def set_result(self, result, reason=None, log_message=None):
         response = dict()

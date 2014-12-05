@@ -8,8 +8,10 @@ import json
 # GAE import
 from google.appengine.api import urlfetch
 from google.appengine.api import taskqueue
+from google.appengine.ext import ndb
 
 # local import
+from models import gcm_app
 
 
 # Some exceptions defined by this module
@@ -282,26 +284,34 @@ class GCM:
                                       deadline=30, follow_redirects=False, validate_certificate=True)
             if response.status_code == 200:
                 # See how to interpret a success response (http://developer.android.com/google/gcm/http.html#success)
-                result_dict = json.loads(response.content)
-                logging.debug('response: %s' % result_dict)
-                failure_count = result_dict['failure']
-                canonical_ids_count = result_dict['canonical_ids']
+                response_dict = json.loads(response.content)
+                logging.debug('response: %s' % response_dict)
+                failure_count = response_dict['failure']
+                canonical_ids_count = response_dict['canonical_ids']
                 if failure_count or canonical_ids_count:  # do nothing if both failure and canonical_ids are 0.
-                    results_list = result_dict['results']
-                    for result in results_list:
-                        if 'message_id' in result:
-                            if 'registration_id' in result:
-                                # TODO: replace the original id with the canonical id
-                                pass
-                        elif 'error' in result:
-                            error = result['error']
+                    defer_failed_registration_ids = list()
+                    defer_replaced_registration_ids = list()
+                    defer_disabled_registration_ids = list()
+                    results_mapping_list = zip(response_dict['results'], registration_ids)
+                    for results_mapping in results_mapping_list:
+                        # results_mapping should look likes below tuple:
+                        # ({'message_id': 'fake_message_id', 'error': 'whats wrong', 'registration_id': 'canonical_id'},
+                        #  registration_id)
+                        # results_mapping[0] is results dictionary
+                        # results_mapping[1] is registration_id unicode string
+                        # Note: all db update operations () defer out of this loop
+                        if 'message_id' in results_mapping[0]:
+                            if 'registration_id' in results_mapping[0]:
+                                # create new device entity and make old device entity disabled.
+                                defer_replaced_registration_ids.append((results_mapping[1],
+                                                                        results_mapping[0]['registration_id']))
+                        elif 'error' in results_mapping[0]:
+                            error = results_mapping[0]['error']
                             if error == 'Unavailable':
-                                # TODO: retry. honor 'Retry-After' header if exists
-                                pass
+                                defer_failed_registration_ids.append(results_mapping[1])
                             elif error == 'NotRegistered':
-                                # TODO: remove the registration_id.
-                                # it may mean the application was uninstalled from device.
-                                pass
+                                # mark this old device entity disabled.
+                                defer_disabled_registration_ids.append(results_mapping[1])
                             # The following errors may be non-recoverable. See how to interpret an error response.
                             # http://developer.android.com/google/gcm/http.html#error_codes
                             elif error == 'MissingRegistration':
@@ -325,7 +335,38 @@ class GCM:
                                 raise DeviceMessageRateExceededException('Device message rate exceeded.')
                             else:
                                 # TODO: probably a non-recoverable error happened,
-                                pass
+                                logging.error('Google GCM server sends back error that we do not handle: ' + error)
+
+                    # Run the deferred actions
+                    # 1. data store operations
+                    entities = list()
+                    for old_registration_id, new_canonical_id in defer_replaced_registration_ids:
+                        old_entity = gcm_app.GcmDeviceModel.get_instance(old_registration_id)
+                        old_entity.enabled = False
+                        new_entity = gcm_app.GcmDeviceModel(id=new_canonical_id)
+                        new_entity.package = old_entity.package
+                        new_entity.version = old_entity.version
+                        new_entity.uuid = old_entity.uuid
+                        entities.append(old_entity)
+                        entities.append(new_entity)
+                    for disable_registration_id in defer_disabled_registration_ids:
+                        disabled_entity = gcm_app.GcmDeviceModel.get_instance(disable_registration_id)
+                        disabled_entity.enabled = False
+                        entities.append(disabled_entity)
+                    ndb.put_multi(entities)
+
+                    # 2. retry failed device
+                    if len(defer_failed_registration_ids):
+                        if 'Retry-After' in response.headers:
+                            suggested_try_after = int(response.headers.get('Retry-After'))
+                        else:
+                            suggested_try_after = None
+                        self.push_to_task_queue(self.api_key, defer_failed_registration_ids, self.try_count + 1,
+                                                suggested_try_after=suggested_try_after, data=data,
+                                                collapse_key=collapse_key, delay_while_idle=delay_while_idle,
+                                                time_to_live=time_to_live,
+                                                restricted_package_name=restricted_package_name, dry_run=dry_run)
+
             elif response.status_code == 400:
                 # This indicates that the request could not be parsed as JSON, or it contained invalid fields
                 # (for instance, passing a string where a number was expected). The exact failure reason is described
